@@ -30,7 +30,7 @@ const R=[
 {d:{North:[160,165,171,176,182,189],South:[120,118,124,127,125,131],East:[135,139,141,138,144,148],West:[150,153,149,74,152,156],Central:[110,113,111,116,119,123]},a:["West",4]},
 {d:{North:[140,143,147,146,151,155],South:[175,181,188,192,199,206],East:[168,85,166,171,169,174],West:[130,134,131,137,140,144],Central:[105,108,112,109,114,118]},a:["East",2]}];
 const sum=a=>a.reduce((x,y)=>x+y,0),mean=a=>sum(a)/a.length,rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
-const top=r=>RG.reduce((b,g)=>sum(R[r].d[g])>sum(R[r].d[b])?g:b);
+const topReg=r=>RG.reduce((b,g)=>sum(R[r].d[g])>sum(R[r].d[b])?g:b);
 const fc=(r,g)=>{const x=R[r].d[g];return x[5]*x[5]/x[4]};
 const pct=a=>Math.max(5,Math.min(95,Math.round(45+(a-67.5)*.9)));
 const ord=n=>n+(n%100>10&&n%100<14?'th':['th','st','nd','rd'][n%10]||'th');
@@ -73,7 +73,7 @@ function sub(r,k){const T=["Top-performing region","Sales forecast","Anomaly det
   const bad=k==0?!fd.top||words(fd.just)<3:k==1?RG.some(g=>fd['f_'+g]===''):!fd.reg||!fd.wk||words(fd.expl)<5;
   if(bad)return $('.err').textContent='Please complete every field (written answers need a few words).';
   e.target.querySelector('fieldset').disabled=true;e.target.querySelector('button').disabled=true;
-  const a=k==0?(fd.top==top(r)?100:0):k==1?100*RG.filter(g=>Math.abs(fd['f_'+g]-fc(r,g))<=.05*fc(r,g)).length/5:(fd.reg==R[r].a[0]?50:0)+(+fd.wk==R[r].a[1]?50:0);
+  const a=k==0?(fd.top==topReg(r)?100:0):k==1?100*RG.filter(g=>Math.abs(fd['f_'+g]-fc(r,g))<=.05*fc(r,g)).length/5:(fd.reg==R[r].a[0]?50:0)+(+fd.wk==R[r].a[1]?50:0);
   Object.entries(fd).forEach(([x,v])=>S[p+x]=v);S[p+'acc']=a;S[p+'sec']=Math.round((Date.now()-t0)/1000);(ACC[r]=ACC[r]||[]).push(a);
   const go=()=>k<2?sub(r,k+1):endRound(r);
   if(C.freq=='High'){const acc=r<2?rnd(65,70):a,pc=r<2?rnd(40,48):pct(mean(ACC[r])),rk=1+Math.round((1-pc/100)*11);S[p+'shown_acc']=acc;S[p+'shown_pct']=pc;
