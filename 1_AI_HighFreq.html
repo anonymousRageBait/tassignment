@@ -65,13 +65,13 @@ function cover(){render(`<div class="card"><h2>Your role</h2><p><i>Imagine you h
 function intro(r){render(`<div class="card"><h2>Round ${r+1} of 3</h2><p>A new weekly sales dataset is ready.</p><button id="go">Start Round ${r+1}</button></div>`,2+r*3);$('#go').onclick=()=>sub(r,0)}
 
 function sub(r,k){const T=["Top-performing region","Sales forecast","Anomaly detection"],t0=Date.now(),p=`r${r+1}_s${k+1}_`;
- const body=k==0?`<p>Which region is the <b>top-performing region</b> (highest total sales, Wk 1–6)?</p>${sel('top',RG)}<p>Justify your choice in one sentence:</p><textarea name="just"></textarea>`
+ const body=k==0?`<p>Which region is the <b>top-performing region</b> (highest total sales, Wk 1–6)?</p>${sel('top',RG)}<p>Justify your choice in one sentence (optional):</p><textarea name="just"></textarea>`
  :k==1?`<p>Forecast <b>Wk 7</b> sales ($K) for each region.</p><p class="muted">${RULE}</p>${RG.map(g=>`<p>${g}: <input type="number" step="any" name="f_${g}" style="width:140px"></p>`).join('')}`
- :`<p>One region shows an <b>anomaly</b> (a sudden drop). Which region and week? </p>${sel('reg',RG)} ${sel('wk',[1,2,3,4,5,6].map(w=>[w,'Week '+w]))}<p>What may have caused it?</p><textarea name="expl"></textarea>`;
+ :`<p>One region shows an <b>anomaly</b> (a sudden drop). Which region and week? </p>${sel('reg',RG)} ${sel('wk',[1,2,3,4,5,6].map(w=>[w,'Week '+w]))}<p>What may have caused it? (optional)</p><textarea name="expl"></textarea>`;
  render(`<div class="card"><h2>Round ${r+1} of 3 · Task ${k+1} of 3: ${T[k]}</h2>${tbl(r)}<form id="f"><fieldset>${body}</fieldset><div class="err"></div><button>Submit answer</button></form></div>`,2+r*3+k);
  $('#f').onsubmit=e=>{e.preventDefault();const fd=Object.fromEntries(new FormData(e.target));
-  const bad=k==0?!fd.top||words(fd.just)<3:k==1?RG.some(g=>fd['f_'+g]===''):!fd.reg||!fd.wk||words(fd.expl)<5;
-  if(bad)return $('.err').textContent='Please complete every field (written answers need a few words).';
+  const bad=k==0?!fd.top:k==1?RG.some(g=>fd['f_'+g]===''):!fd.reg||!fd.wk;
+  if(bad)return $('.err').textContent='Please complete all required fields (written comments are optional).';
   e.target.querySelector('fieldset').disabled=true;e.target.querySelector('button').disabled=true;
   const a=k==0?(fd.top==topReg(r)?100:0):k==1?100*RG.filter(g=>Math.abs(fd['f_'+g]-fc(r,g))<=.05*fc(r,g)).length/5:(fd.reg==R[r].a[0]?50:0)+(+fd.wk==R[r].a[1]?50:0);
   Object.entries(fd).forEach(([x,v])=>S[p+x]=v);S[p+'acc']=a;S[p+'sec']=Math.round((Date.now()-t0)/1000);(ACC[r]=ACC[r]||[]).push(a);
