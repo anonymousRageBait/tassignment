@@ -52,9 +52,14 @@ function fb(text,cb){const b=document.createElement('div');b.className='fb';
  b.innerHTML=IC+'<div><small>'+LBL+'</small><i class="muted">'+(C.src=='AI'?'Evaluating your response…':'Your supervisor is reviewing your response…')+'</i></div>';app.appendChild(b);
  setTimeout(()=>{b.lastChild.innerHTML='<small>'+LBL+'</small>'+text;cb()},rnd(1500,2500))}
 
-function welcome(){render(`<div class="card"><h1>Sales Analyst Decision-Making Study</h1><p>You are invited to take part in a research study on how people perform analytical work. It takes about 35 minutes: a 20-minute work session followed by a short questionnaire. Participation is voluntary, your responses are anonymous and used for research only, and you may stop at any time by closing this window.</p><form id="f"><p>Participant / Prolific ID<br><input type="text" name="pid" value="${P.get('PROLIFIC_PID')||''}"></p><label><input type="checkbox" name="ok"> I am 18 or older and I agree to take part.</label><div class="err"></div><button>Continue</button></form></div>`,0);
+function welcome(){render(`<div class="card"><h1>Sales Analyst Decision-Making Study</h1><p>You are invited to take part in a research study on how people perform analytical work. It takes about 35 minutes: a 20-minute work session followed by a short questionnaire. Participation is voluntary, your responses are kept confidential and used for research only, and you may stop at any time by closing this window.</p><form id="f"><p>NSU ID (10 digits)<br><input type="text" name="pid" inputmode="numeric" maxlength="10" autocomplete="off"></p><p>Section (number)<br><input type="number" name="section" min="1" step="1" style="width:120px"></p><p>Course (e.g., MKT202)<br><input type="text" name="course" autocomplete="off"></p><label><input type="checkbox" name="ok"> I am 18 or older and I agree to take part.</label><div class="err"></div><button>Continue</button></form></div>`,0);
  $('#f').onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));
-  if(!f.pid.trim()||!f.ok)return $('.err').textContent='Enter your ID and tick the consent box to continue.';S.pid=f.pid.trim();cover()}}
+  const id=f.pid.trim(),sec=f.section.trim(),crs=f.course.trim();
+  if(!/^\d{10}$/.test(id))return $('.err').textContent='NSU ID must be exactly 10 digits.';
+  if(!/^\d+$/.test(sec)||+sec<1)return $('.err').textContent='Section must be a whole number (e.g., 1).';
+  if(!crs)return $('.err').textContent='Please enter your course.';
+  if(!f.ok)return $('.err').textContent='Please tick the consent box to continue.';
+  S.pid=id;S.section=parseInt(sec,10);S.course=crs;cover()}}
 
 function cover(){render(`<div class="card"><h2>Your role</h2><p><i>Imagine you have just joined as a Sales Analyst at <b>RetailPro</b>, a mid-sized consumer goods company. Your manager has asked you to analyze weekly sales data and produce a regional sales forecast over a 20-minute work session. Your performance will be evaluated based on the accuracy and quality of your analysis. You will receive performance feedback during the task.</i></p>
 <h2>The task</h2><p>There are <b>three rounds</b> (about 6–7 minutes each). Each round shows six weeks of sales ($K) for five regions. In every round you complete three tasks in order:</p>
